@@ -1,0 +1,40 @@
+<div class="table-responsive">
+    <table class="table mb-0 table-striped">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Slug</th>
+            <th scope="col">Parent</th>
+            <th scope="col" class="text-center">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for category in categories %}
+            <tr id="item-{{ category.id }}">
+                <td>{{ category.name }}</td>
+                <td>{{ category.slug }}</td>
+                <td>{{ category.parent.name|default:"" }}</td>
+                <td align="center">
+                    <button type="button" class="btn btn-sm btn-success"
+                            hx-get="{% url 'category-edit-modal' category.id %}"
+                            hx-target="#modal_edit"
+                            hx-swap="innerHTML"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_edit">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-danger"
+                            hx-delete="{% url 'category-delete' category.id %}"
+                            hx-target="#item-{{ category.id }}"
+                            hx-swap="outerHTML"
+                            hx-confirm="Are you sure you want to delete this item?"
+                            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

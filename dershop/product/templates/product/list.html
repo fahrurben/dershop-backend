@@ -1,0 +1,64 @@
+{% extends "../base/base.html" %}
+
+{% block content %}
+    {% include "../base/navbar.html" %}
+    <div class="container py-5">
+        <div class="overflow-hidden card table-nowrap table-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex">
+                    <h5 class="mb-0" style="padding-top: 0.5rem">Product</h5>
+                    <button type="button" class="btn btn-sm"
+                            hx-get="/backend/product/modal_create/"
+                            hx-target="#modal_create"
+                            hx-swap="innerHTML"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_create"
+                    >
+                        <i class="bi bi-plus-circle-fill" style="font-size: 1.5rem; color: cornflowerblue;"></i>
+                    </button>
+                    <a type="button" class="btn btn-sm"
+                            href="/backend/product/create/"
+                            hx-get="/backend/product/modal_create/"
+                            hx-target="#modal_create"
+                            hx-swap="innerHTML"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_create"
+                    >
+                        <i class="bi bi-plus-circle-fill" style="font-size: 1.5rem; color: cornflowerblue;"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0 table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Slug</th>
+                        <th scope="col">Category</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.slug }}</td>
+                            <td>{{ product.category.name|default:"" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal_create"
+         class="modal modal-blur fade"
+         style="display: none"
+         aria-hidden="false"
+         tabindex="-1"
+    >
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+{% endblock %}
