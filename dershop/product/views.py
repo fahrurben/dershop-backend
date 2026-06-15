@@ -1,17 +1,17 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.text import slugify
-from django.contrib.auth.decorators import user_passes_test
-from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.views.generic import ListView
 
-from .forms import ProductForm, CategoryForm
+from .forms import CategoryForm, ProductForm
 from .models import Category, Product
+from .services import category_create, category_update
 
 
 class CategoryListView(LoginRequiredMixin, ListView):
@@ -53,17 +53,13 @@ def category_modal_edit(request, id):
 
 @user_passes_test(lambda u: u.is_staff)
 @require_POST
-def create_category(request):
+def create_category_view(request):
     """Create a new product via HTMX."""
     form = CategoryForm(request.POST)
 
     if form.is_valid():
         data = form.data
-        category = Category()
-        category.name = data.get("name")
-        category.slug = slugify(category.name)
-        category.parent_id = data.get("parent")
-        category.save()
+        category = category_create(name=data.get("name"), parent_id=data.get("parent"))
 
         messages.success(request, "Item created!")
         response = HttpResponse(status=200)
@@ -76,7 +72,7 @@ def create_category(request):
 
 @user_passes_test(lambda u: u.is_staff)
 @require_http_methods(["POST"])
-def update_category(request, id):
+def update_category_view(request, id):
     """Update product via HTMX."""
     action_url = reverse('category-update', kwargs={'id': id})
     category = get_object_or_404(Category, pk=id)
@@ -84,10 +80,7 @@ def update_category(request, id):
     data = form.data
 
     if form.is_valid():
-        category.name = data.get("name")
-        category.slug = slugify(category.name)
-        category.parent_id = data.get("parent")
-        category.save()
+        category = category_update(category=category, data=data)
 
         messages.success(request, "Item updated successfully!")
         response = HttpResponse(status=200)

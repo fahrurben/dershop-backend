@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.models import BaseUserManager as BUM
 from django.db import models
-from django.template.defaultfilters import first
 
 from dershop.common.models import BaseModel
 
