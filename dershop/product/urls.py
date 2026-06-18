@@ -21,6 +21,5 @@ urlpatterns = [
     path("category/delete/<int:id>/", delete_category, name="category-delete"),
 
     path("product/", ProductListView.as_view(), name="product-list"),
-    path("product/create/", product_create_view, name="product-create-view"),
     path("product/create/", create_product, name="product-create"),
 ]

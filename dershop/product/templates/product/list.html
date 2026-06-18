@@ -7,23 +7,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="d-flex">
                     <h5 class="mb-0" style="padding-top: 0.5rem">Product</h5>
-                    <button type="button" class="btn btn-sm"
-                            hx-get="/backend/product/modal_create/"
-                            hx-target="#modal_create"
-                            hx-swap="innerHTML"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modal_create"
-                    >
-                        <i class="bi bi-plus-circle-fill" style="font-size: 1.5rem; color: cornflowerblue;"></i>
-                    </button>
-                    <a type="button" class="btn btn-sm"
-                            href="/backend/product/create/"
-                            hx-get="/backend/product/modal_create/"
-                            hx-target="#modal_create"
-                            hx-swap="innerHTML"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modal_create"
-                    >
+                    <a type="button" class="btn btn-sm" href="{% url 'product-create' %}">
                         <i class="bi bi-plus-circle-fill" style="font-size: 1.5rem; color: cornflowerblue;"></i>
                     </a>
                 </div>
@@ -48,6 +32,10 @@
                     </tbody>
                 </table>
             </div>
+
+            {% if page_obj is not null %}
+                {% include "../base/pagination.html" with page_obj=page_obj %}
+            {% endif %}
         </div>
     </div>
 

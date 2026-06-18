@@ -1,6 +1,6 @@
 from django.db import models
 
-from dershop.common.models import BaseModel
+from dershop.common.models import BaseModel, get_unique_product_file_path
 
 
 class Category(BaseModel):
@@ -22,7 +22,7 @@ class Product(BaseModel):
 
 class ProductImage(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    filename = models.CharField(max_length=255)
+    filename =  models.ImageField(upload_to=get_unique_product_file_path, blank=True, null=True)
 
     def __str__(self):
         return self.filename

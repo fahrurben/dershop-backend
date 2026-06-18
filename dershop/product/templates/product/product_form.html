@@ -1,4 +1,4 @@
-<form hx-post="{% url 'product-create' %}" hx-target="closest .modal" hx-swap="innerHTML">
+<form hx-post="{% url 'product-create' %}" hx-encoding="multipart/form-data">
     {% csrf_token %}
 
     <!-- Global non-field errors (e.g., unique constraints) -->
@@ -18,8 +18,21 @@
             {% endif %}
         </div>
     {% endfor %}
+
+    <h3>Images</h3>
+    {{ formset.management_form }}
+
+    <div id="image-form-list">
+        {% for inline_form in formset %}
+            <div class="image-form-row">
+                {{ inline_form.as_p }}
+                <hr>
+            </div>
+        {% endfor %}
+    </div>
+
     <div class="d-flex flex-row-reverse gap-2">
         <button class="btn btn-primary" type="submit">Save</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="{% url 'product-list' %}" type="button" class="btn btn-secondary">Back</a>
     </div>
 </form>
