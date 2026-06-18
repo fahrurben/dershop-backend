@@ -37,13 +37,13 @@ class BaseUserManager(BUM):
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        if not extra_fields.get('first_name'):
-            raise ValueError('Superuser first name should not empty')
-        if not extra_fields.get('last_name'):
-            raise ValueError('Superuser last name should not empty.')
+        if not extra_fields.get("first_name"):
+            raise ValueError("Superuser first name should not empty")
+        if not extra_fields.get("last_name"):
+            raise ValueError("Superuser last name should not empty.")
 
-        first_name = extra_fields.get('first_name')
-        last_name = extra_fields.get('last_name')
+        first_name = extra_fields.get("first_name")
+        last_name = extra_fields.get("last_name")
 
         user = self.create_user(
             email=email,

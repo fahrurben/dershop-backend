@@ -10,6 +10,8 @@ from dershop.product.views import (
     delete_category,
     product_create_view,
     update_category_view,
+    update_product_view,
+    delete_product_view,
 )
 
 urlpatterns = [
@@ -19,7 +21,8 @@ urlpatterns = [
     path("category/modal-edit/<int:id>/", category_modal_edit, name="category-edit-modal"),
     path("category/update/<int:id>/", update_category_view, name="category-update"),
     path("category/delete/<int:id>/", delete_category, name="category-delete"),
-
     path("product/", ProductListView.as_view(), name="product-list"),
     path("product/create/", create_product, name="product-create"),
+    path("product/update/<int:id>/", update_product_view, name="product-update"),
+    path("product/delete/<int:id>/", delete_product_view, name="product-delete"),
 ]

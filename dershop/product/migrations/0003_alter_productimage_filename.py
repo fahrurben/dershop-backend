@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('product', '0002_alter_productimage_filename'),
+        ("product", "0002_alter_productimage_filename"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='productimage',
-            name='filename',
-            field=models.ImageField(blank=True, null=True, upload_to=dershop.common.models.get_unique_product_file_path),
+            model_name="productimage",
+            name="filename",
+            field=models.ImageField(
+                blank=True, null=True, upload_to=dershop.common.models.get_unique_product_file_path
+            ),
         ),
     ]

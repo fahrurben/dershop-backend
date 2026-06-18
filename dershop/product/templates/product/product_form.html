@@ -1,4 +1,4 @@
-<form hx-post="{% url 'product-create' %}" hx-encoding="multipart/form-data">
+<form hx-post="{{ action_url }}" hx-encoding="multipart/form-data">
     {% csrf_token %}
 
     <!-- Global non-field errors (e.g., unique constraints) -->

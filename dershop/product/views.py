@@ -12,7 +12,7 @@ from django.views.generic import ListView
 
 from .forms import CategoryForm, ProductForm, ProductImageFormset
 from .models import Category, Product, ProductImage
-from .services import category_create, category_update
+from .services import category_create, category_update, product_create, product_update
 
 
 class CategoryListView(LoginRequiredMixin, ListView):
@@ -26,32 +26,32 @@ class CategoryListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        query = self.request.GET.get('q')
+        query = self.request.GET.get("q")
         if query:
             queryset = queryset.filter(name__icontains=query)
         return queryset
 
     def get_template_names(self):
         # Check for the htmx header to return only the list partial
-        if self.request.headers.get('HX-Request'):
-            return ['category/table.html']
+        if self.request.headers.get("HX-Request"):
+            return ["category/table.html"]
         return [self.template_name]
 
 
 @user_passes_test(lambda u: u.is_staff)
 def category_modal_create(request):
     form = CategoryForm()
-    action_url = reverse('category-create')
-    return render(request, 'category/modal_create.html', {'form': form, 'action_url': action_url})
+    action_url = reverse("category-create")
+    return render(request, "category/modal_create.html", {"form": form, "action_url": action_url})
 
 
 @user_passes_test(lambda u: u.is_staff)
 def category_modal_edit(request, id):
     category = Category.objects.get(id=id)
-    action_url = reverse('category-update', kwargs={'id': id})
+    action_url = reverse("category-update", kwargs={"id": id})
 
     form = CategoryForm(instance=category)
-    return render(request, 'category/modal_edit.html', {'form': form, 'action_url': action_url})
+    return render(request, "category/modal_edit.html", {"form": form, "action_url": action_url})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -66,10 +66,10 @@ def create_category_view(request):
 
         messages.success(request, "Item created!")
         response = HttpResponse(status=200)
-        response['HX-Redirect'] = reverse('category-list')
+        response["HX-Redirect"] = reverse("category-list")
         return response
     else:
-        html = render_to_string('category/category_form.html', {'form': form})
+        html = render_to_string("category/category_form.html", {"form": form})
         return HttpResponse(html, status=400)
 
 
@@ -77,7 +77,7 @@ def create_category_view(request):
 @require_http_methods(["POST"])
 def update_category_view(request, id):
     """Update product via HTMX."""
-    action_url = reverse('category-update', kwargs={'id': id})
+    action_url = reverse("category-update", kwargs={"id": id})
     category = get_object_or_404(Category, pk=id)
     form = CategoryForm(request.POST, instance=category)
     data = form.data
@@ -87,11 +87,11 @@ def update_category_view(request, id):
 
         messages.success(request, "Item updated successfully!")
         response = HttpResponse(status=200)
-        response['HX-Redirect'] = reverse('category-list')
+        response["HX-Redirect"] = reverse("category-list")
         return response
     else:
         # html = render_to_string('category/category_form.html', {'form': form})
-        return render(request, 'category/modal_edit.html', {'form': form, 'action_url': action_url})
+        return render(request, "category/modal_edit.html", {"form": form, "action_url": action_url})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -101,7 +101,7 @@ def delete_category(request, id):
     category.delete()
     messages.success(request, "Item deleted successfully!")
     response = HttpResponse(status=200)
-    response['HX-Redirect'] = reverse('category-list')
+    response["HX-Redirect"] = reverse("category-list")
     return response
 
 
@@ -115,14 +115,14 @@ class ProductListView(LoginRequiredMixin, ListView):
 
 def product_modal_create(request):
     form = ProductForm()
-    return render(request, 'product/modal_create.html', {'form': form})
+    return render(request, "product/modal_create.html", {"form": form})
 
 
 @login_required
 @require_GET
 def product_create_view(request):
     form = ProductForm()
-    return render(request, 'product/create.html', {'form': form})
+    return render(request, "product/create.html", {"form": form})
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -130,29 +130,89 @@ def product_create_view(request):
 def create_product(request):
     """Create a new product via HTMX."""
     product = Product()
+    action_url = reverse("product-create")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
         formset = ProductImageFormset(request.POST, request.FILES)
         if form.is_valid():
             data = form.data
-            product = Product()
-            product.name = data.get("name")
-            product.slug = slugify(product.name)
-            product.description = data.get("description")
-            product.category_id = data.get("category")
-            product.save()
+            product = product_create(data=data, image_file=request.FILES.get("images-0-filename"))
 
-            for child_form in formset.forms:
-                uploaded_file = request.FILES.get("images-0-filename")
-                product_image = ProductImage(product=product, filename=uploaded_file)
-                product_image.save()
-
-            return redirect(reverse('product-list'))
+            messages.success(request, "Item created successfully!")
+            response = HttpResponse(status=200)
+            response["HX-Redirect"] = reverse("product-list")
+            return response
         else:
-            return render(request, 'product/create.html', {'form': form, 'formset': formset})
+            return render(
+                request,
+                "product/create.html",
+                {"form": form, "formset": formset, "action_url": action_url},
+            )
 
     form = ProductForm()
     formset = ProductImageFormset()
 
-    return render(request, 'product/create.html', {'form': form, 'formset': formset})
+    return render(
+        request, "product/create.html", {"form": form, "formset": formset, "action_url": action_url}
+    )
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_http_methods(["GET", "POST"])
+def update_product_view(request, id):
+    """Update product via HTMX."""
+    product = get_object_or_404(Product, pk=id)
+    action_url = reverse("product-update", kwargs={"id": id})
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        formset = ProductImageFormset(request.POST, request.FILES, instance=product)
+        if form.is_valid() and formset.is_valid():
+            data = form.data
+            product = product_update(product=product, data=data)
+
+            instances = formset.save(commit=False)
+
+            for instance in instances:
+                # Ensure the foreign key points to our parent recipe
+                instance.product = product
+
+                # Manually save to the database
+                instance.save()
+
+                # 4. Handle Deletions manually
+                # If the user checked the "Delete" checkbox on any row, Django places it here
+            for deleted_obj in formset.deleted_objects:
+                deleted_obj.delete()
+
+            formset.save_m2m()
+
+            messages.success(request, "Item updated successfully!")
+            response = HttpResponse(status=200)
+            response["HX-Redirect"] = reverse("product-list")
+            return response
+        else:
+            return render(
+                request,
+                "product/edit.html",
+                {"form": form, "formset": formset, "action_url": action_url},
+            )
+
+    form = ProductForm(instance=product)
+    formset = ProductImageFormset(instance=product)
+
+    return render(
+        request, "product/edit.html", {"form": form, "formset": formset, "action_url": action_url}
+    )
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_http_methods(["DELETE"])
+def delete_product_view(request, id):
+    product = get_object_or_404(Product, pk=id)
+    product.delete()
+    messages.success(request, "Item deleted successfully!")
+    response = HttpResponse(status=200)
+    response["HX-Redirect"] = reverse("product-list")
+    return response
