@@ -20,10 +20,21 @@
     {% endfor %}
 
     <h3>Images</h3>
-    {{ formset.management_form }}
+    {{ image_formset.management_form }}
 
     <div id="image-form-list">
-        {% for inline_form in formset %}
+        {% for inline_form in image_formset %}
+            <div class="image-form-row">
+                {{ inline_form.as_p }}
+                <hr>
+            </div>
+        {% endfor %}
+    </div>
+
+    <h3>Variants</h3>
+    {{ variant_formset.management_form }}
+    <div id="image-form-list">
+        {% for inline_form in variant_formset %}
             <div class="image-form-row">
                 {{ inline_form.as_p }}
                 <hr>

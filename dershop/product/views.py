@@ -10,7 +10,7 @@ from django.utils.text import slugify
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.views.generic import ListView
 
-from .forms import CategoryForm, ProductForm, ProductImageFormset
+from .forms import CategoryForm, ProductForm, ProductImageFormset, ProductVariantFormset
 from .models import Category, Product, ProductImage
 from .services import category_create, category_update, product_create, product_update
 
@@ -134,10 +134,11 @@ def create_product(request):
 
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
-        formset = ProductImageFormset(request.POST, request.FILES)
+        image_formset = ProductImageFormset(request.POST, request.FILES)
+        variant_formset = ProductVariantFormset(request.POST)
         if form.is_valid():
             data = form.data
-            product = product_create(data=data, image_file=request.FILES.get("images-0-filename"))
+            product = product_create(request=request, data=data)
 
             messages.success(request, "Item created successfully!")
             response = HttpResponse(status=200)
@@ -147,14 +148,17 @@ def create_product(request):
             return render(
                 request,
                 "product/create.html",
-                {"form": form, "formset": formset, "action_url": action_url},
+                {"form": form, "image_formset": image_formset, "action_url": action_url},
             )
 
     form = ProductForm()
-    formset = ProductImageFormset()
+    image_formset = ProductImageFormset()
+    variant_formset = ProductVariantFormset()
 
     return render(
-        request, "product/create.html", {"form": form, "formset": formset, "action_url": action_url}
+        request,
+        "product/create.html",
+        {"form": form, "image_formset": image_formset, "variant_formset": variant_formset, "action_url": action_url}
     )
 
 
@@ -167,14 +171,17 @@ def update_product_view(request, id):
 
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES, instance=product)
-        formset = ProductImageFormset(request.POST, request.FILES, instance=product)
-        if form.is_valid() and formset.is_valid():
+        image_formset = ProductImageFormset(request.POST, request.FILES, instance=product)
+        variant_formset = ProductVariantFormset(request.POST, request.FILES, instance=product)
+
+        if form.is_valid() and image_formset.is_valid() and variant_formset.is_valid():
             data = form.data
-            product = product_update(product=product, data=data)
+            product = product_update(request=request, product=product, data=data)
 
-            instances = formset.save(commit=False)
+            image_instances = image_formset.save(commit=False)
+            variant_instances = variant_formset.save(commit=False)
 
-            for instance in instances:
+            for instance in image_instances:
                 # Ensure the foreign key points to our parent recipe
                 instance.product = product
 
@@ -183,10 +190,24 @@ def update_product_view(request, id):
 
                 # 4. Handle Deletions manually
                 # If the user checked the "Delete" checkbox on any row, Django places it here
-            for deleted_obj in formset.deleted_objects:
+            for deleted_obj in image_formset.deleted_objects:
                 deleted_obj.delete()
 
-            formset.save_m2m()
+            image_formset.save_m2m()
+
+            for instance in variant_instances:
+                # Ensure the foreign key points to our parent recipe
+                instance.product = product
+
+                # Manually save to the database
+                instance.save()
+
+                # 4. Handle Deletions manually
+                # If the user checked the "Delete" checkbox on any row, Django places it here
+            for deleted_obj in image_formset.deleted_objects:
+                deleted_obj.delete()
+
+            variant_formset.save_m2m()
 
             messages.success(request, "Item updated successfully!")
             response = HttpResponse(status=200)
@@ -196,14 +217,17 @@ def update_product_view(request, id):
             return render(
                 request,
                 "product/edit.html",
-                {"form": form, "formset": formset, "action_url": action_url},
+                {"form": form, "image_formset": image_formset, "variant_formset": variant_formset,
+                 "action_url": action_url},
             )
 
     form = ProductForm(instance=product)
-    formset = ProductImageFormset(instance=product)
+    image_formset = ProductImageFormset(instance=product)
+    variant_formset = ProductVariantFormset(instance=product)
 
     return render(
-        request, "product/edit.html", {"form": form, "formset": formset, "action_url": action_url}
+        request, "product/edit.html",
+        {"form": form, "image_formset": image_formset, "variant_formset": variant_formset, "action_url": action_url}
     )
 
 

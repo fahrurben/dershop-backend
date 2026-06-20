@@ -2,7 +2,7 @@ from django.db import transaction
 from django.utils.text import slugify
 
 from dershop.common.services import model_update
-from dershop.product.models import Category, Product, ProductImage
+from dershop.product.models import Category, Product, ProductImage, Variant
 
 
 @transaction.atomic
@@ -26,14 +26,7 @@ def category_update(*, category: Category, data) -> Category:
 
 
 @transaction.atomic
-def product_create(*, data, image_file) -> Product:
-    fields: list[str] = [
-        "name",
-        "category",
-        "description",
-        "images-0-filename",
-    ]
-
+def product_create(*, request, data) -> Product:
     slug = slugify(data.get("name"))
 
     product = Product.objects.create(
@@ -43,14 +36,29 @@ def product_create(*, data, image_file) -> Product:
         description=data.get("description"),
     )
 
-    if image_file is not None:
-        product_image = ProductImage.objects.create(product=product, filename=image_file)
+    images_total = int(data.get("images-TOTAL_FORMS")[0])
+
+    for i in range(images_total):
+        image_file = request.FILES.get(f"images-{i}-filename")
+        ProductImage.objects.create(product=product, filename=image_file)
+
+    variant_total = int(data.get("variants-TOTAL_FORMS")[0])
+
+    for i in range(variant_total):
+        variant = Variant()
+        variant.product = product
+        variant.name = data.get(f"variants-{i}-name")
+        variant.slug = product.slug + "__" + slugify(data.get(f"variants-{i}-name"))
+        variant.price = float(data.get(f"variants-{i}-price"))
+        variant.stock = int(data.get(f"variants-{i}-stock"))
+        variant.weight = float(data.get(f"variants-{i}-weight"))
+        variant.save()
 
     return product
 
 
 @transaction.atomic
-def product_update(*, product: Product, data) -> Product:
+def product_update(*, request, product: Product, data) -> Product:
     fields: list[str] = [
         "name",
         "category_id",
