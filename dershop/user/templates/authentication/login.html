@@ -1,0 +1,56 @@
+{% load static %}
+{% load django_htmx %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %} {% endblock %}</title>
+    {% htmx_script %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card" style="width:400px;">
+        <form method="post">
+            <div class="card-header">
+                Sign In
+            </div>
+            {% csrf_token %}
+            <div class="card-body">
+                <div class="text-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% for field in form %}
+                    <div class="row py-1">
+                        <!-- Label tag with automatic CSS assignment -->
+                        <label class="form-label col-5" for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                        <div class="col-7 d-flex justify-content-end">
+                            <!-- Render the input field itself -->
+                            {{ field }}
+
+                            <!-- Individual field errors -->
+                            {% if field.errors %}
+                                <div class="text-danger small">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% endfor %}
+                <div class="row justify-content-end">
+                    <button class="btn btn-primary col-4 me-2 mt-2" type="submit">Log In</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+
+</html>
