@@ -1,0 +1,27 @@
+{% load custom_tags %}
+<table class="table mb-0 table-striped">
+    <thead>
+    <tr>
+        <th scope="col">No</th>
+        <th scope="col">Date</th>
+        <th scope="col">Customer</th>
+        <th scope="col">Total</th>
+        <th scope="col">Status</th>
+        <th scope="col" class="text-center">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for order in orders %}
+        <tr id="item-{{ order.id }}">
+            <td>{{ order.no }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>{{ order.customer.full_name }}</td>
+            <td>{% format_amount order.total_amount %}</td>
+            <td>{{ order.get_status_display }}</td>
+            <td>
+
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

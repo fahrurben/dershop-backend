@@ -119,6 +119,7 @@ def product_modal_create(request):
 
 
 @login_required
+@user_passes_test(lambda u: u.is_staff)
 @require_GET
 def product_create_view(request):
     form = ProductForm()
@@ -198,6 +199,7 @@ def update_product_view(request, id):
             for instance in variant_instances:
                 # Ensure the foreign key points to our parent recipe
                 instance.product = product
+                instance.slug = product.slug + "__" + slugify(instance.name)
 
                 # Manually save to the database
                 instance.save()

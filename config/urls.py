@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("backend/", include("dershop.user.urls")),
     path("backend/", include("dershop.product.urls")),
+    path("backend/", include("dershop.order.urls")),
 ]
 
 
