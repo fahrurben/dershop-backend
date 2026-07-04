@@ -18,8 +18,16 @@
             <td>{{ order.customer.full_name }}</td>
             <td>{% format_amount order.total_amount %}</td>
             <td>{{ order.get_status_display }}</td>
-            <td>
-
+            <td align="center">
+                <button type="button" class="btn btn-sm btn-success"
+                            hx-get="{% url 'order-view-modal' order.id %}"
+                            hx-target="#modal_view"
+                            hx-swap="innerHTML"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modal_view">
+                        <i class="bi bi-file-earmark-text-fill"></i> View
+                    </button>
+                <button type="button" class="btn btn-sm btn-primary">Update</button>
             </td>
         </tr>
     {% endfor %}

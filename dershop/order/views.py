@@ -1,9 +1,11 @@
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.shortcuts import render
 from django.db.models import Value, F
 from django.db.models.functions import Concat
 from django.db.models import Q
+from django.urls import reverse
 
 from dershop.order.models import Order, OrderStatus
 
@@ -45,3 +47,9 @@ class OrderListView(LoginRequiredMixin, ListView):
         if self.request.headers.get("HX-Request"):
             return ["order/table.html"]
         return [self.template_name]
+
+@user_passes_test(lambda u: u.is_staff)
+def order_modal_view(request, id):
+    order = Order.objects.get(id=id)
+
+    return render(request, "order/modal_view.html", {"order": order})
