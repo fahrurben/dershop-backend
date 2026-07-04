@@ -1,12 +1,16 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
-from django.shortcuts import render
+from django.db.models import Q
 from django.db.models import Value, F
 from django.db.models.functions import Concat
-from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+from django.views.generic import ListView
 
+from dershop.order.forms import OrderStatusForm
 from dershop.order.models import Order, OrderStatus
 
 
@@ -48,8 +52,40 @@ class OrderListView(LoginRequiredMixin, ListView):
             return ["order/table.html"]
         return [self.template_name]
 
+
 @user_passes_test(lambda u: u.is_staff)
 def order_modal_view(request, id):
     order = Order.objects.get(id=id)
 
     return render(request, "order/modal_view.html", {"order": order})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def order_modal_edit(request, id):
+    order = Order.objects.get(id=id)
+    action_url = reverse("order-update", kwargs={"id": id})
+
+    form = OrderStatusForm(instance=order)
+    return render(request, "order/modal_edit.html", {"form": form, "action_url": action_url})
+
+
+@user_passes_test(lambda u: u.is_staff)
+@require_http_methods(["POST"])
+def update_order_view(request, id):
+    """Update product via HTMX."""
+    action_url = reverse("category-update", kwargs={"id": id})
+    category = get_object_or_404(Order, pk=id)
+    form = OrderStatusForm(request.POST, instance=category)
+    data = form.data
+
+    if form.is_valid():
+        order = Order.objects.get(id=id)
+        order.status = data.get('status')
+        order.save()
+
+        messages.success(request, "Item updated successfully!")
+        response = HttpResponse(status=200)
+        response["HX-Redirect"] = reverse("order-list")
+        return response
+    else:
+        return render(request, "order/modal_edit.html", {"form": form, "action_url": action_url})

@@ -1,0 +1,35 @@
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Update Order Status</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form hx-post="{{ action_url }}" hx-target="closest .modal" hx-swap="innerHTML">
+                {% csrf_token %}
+
+                <!-- Global non-field errors (e.g., unique constraints) -->
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="mb-3">
+                        <!-- Label tag with automatic CSS assignment -->
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+
+                        <!-- Render the input field itself -->
+                        {{ field }}
+
+                        <!-- Individual field errors -->
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex flex-row-reverse gap-2">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

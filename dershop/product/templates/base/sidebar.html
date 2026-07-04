@@ -9,20 +9,18 @@
     <ul class="nav nav-pills flex-column mb-auto">
         {% for menu in arr_menu %}
             {% if menu.child %}
-                <li>
-                    <button class="btn btn-toggle text-start rounded collapsed text-white" data-bs-toggle="collapse"
-                            data-bs-target="#home-collapse" aria-expanded="true">
+                <li class="nav-item">
+                    <a href="#submenu{{ forloop.counter0 }}" class="nav-link" data-bs-toggle="collapse" aria-expanded="false">
                         {{ menu.label }}
-                    </button>
-                    <div class="collapse show" id="home-collapse">
-                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                            {% for menu_child in menu.child %}
-                                <li>
-                                    <a href="{{ menu_child.url }}" class="nav-link {% if request.path == menu_child.url %}active{% endif %} rounded text-white">{{ menu_child.label }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    </a>
+                    <ul class="collapse nav flex-column ms-3" id="submenu{{ forloop.counter0 }}">
+                        {% for menu_child in menu.child %}
+                            <li>
+                                <a href="{{ menu_child.url }}"
+                                   class="nav-link py-1 {% if request.path == menu_child.url %}active{% endif %} rounded text-white">{{ menu_child.label }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </li>
             {% endif %}
         {% endfor %}
@@ -32,7 +30,7 @@
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1"
            data-bs-toggle="dropdown" aria-expanded="false">
             <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
-            <strong>mdo</strong>
+            <strong>{{ user.full_name }}</strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
             <li><a class="dropdown-item" href="#">Profile</a></li>
@@ -43,7 +41,7 @@
                 <form action="{% url 'logout' %}" method="post" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="dropdown-item">Log Out</button>
-                  </form>
+                </form>
             </li>
         </ul>
     </div>
