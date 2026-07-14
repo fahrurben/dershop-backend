@@ -4,7 +4,9 @@ from .models import Category, Product, ProductImage, Variant
 
 
 class CategoryForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, widget=forms.TextInput(attrs={"class": "form-control"}))
+    name = forms.CharField(
+        max_length=255, widget=forms.TextInput(attrs={"class": "form-control"})
+    )
     parent = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         blank=True,
@@ -18,14 +20,18 @@ class CategoryForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, widget=forms.TextInput(attrs={"class": "form-control"}))
+    name = forms.CharField(
+        max_length=255, widget=forms.TextInput(attrs={"class": "form-control"})
+    )
     category = forms.ModelChoiceField(
         queryset=Category.objects.all(),
         blank=True,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"}),
     )
-    description = forms.CharField(widget=forms.Textarea(attrs={"class": "form-control"}))
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "form-control"})
+    )
 
     class Meta:
         model = Product
@@ -33,15 +39,22 @@ class ProductForm(forms.ModelForm):
 
 
 class VariantForm(forms.ModelForm):
-    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={"class": "form-control"}))
+    name = forms.CharField(
+        max_length=100, widget=forms.TextInput(attrs={"class": "form-control"})
+    )
     price = forms.DecimalField(
         max_digits=9,
         decimal_places=2,
-        widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "0.01"}
-        ))
-    stock = forms.IntegerField(widget=forms.NumberInput(attrs={"class": "form-control"}))
-    weight = forms.DecimalField(max_digits=9, decimal_places=2, widget=forms.NumberInput(attrs={"class": "form-control"}))
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+    )
+    stock = forms.IntegerField(
+        widget=forms.NumberInput(attrs={"class": "form-control"})
+    )
+    weight = forms.DecimalField(
+        max_digits=9,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
+    )
 
     class Meta:
         model = Variant
@@ -53,5 +66,9 @@ ProductImageFormset = inlineformset_factory(
 )
 
 ProductVariantFormset = inlineformset_factory(
-    Product, Variant, form=VariantForm, extra=1, can_delete=True,
+    Product,
+    Variant,
+    form=VariantForm,
+    extra=1,
+    can_delete=True,
 )

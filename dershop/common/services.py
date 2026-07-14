@@ -7,7 +7,11 @@ from dershop.common.types import DjangoModelType
 
 
 def model_update(
-    *, instance: DjangoModelType, fields: List[str], data: Dict[str, Any], auto_updated_at=True
+    *,
+    instance: DjangoModelType,
+    fields: List[str],
+    data: Dict[str, Any],
+    auto_updated_at=True,
 ) -> Tuple[DjangoModelType, bool]:
     """
     Generic update service meant to be reused in local update services.
@@ -48,9 +52,9 @@ def model_update(
         # If field is not an actual model field, raise an error
         model_field = model_fields.get(field)
 
-        assert model_field is not None, (
-            f"{field} is not part of {instance.__class__.__name__} fields."
-        )
+        assert (
+            model_field is not None
+        ), f"{field} is not part of {instance.__class__.__name__} fields."
 
         # If we have m2m field, handle differently
         if isinstance(model_field, models.ManyToManyField):

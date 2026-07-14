@@ -1,6 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.shortcuts import redirect
@@ -15,7 +15,8 @@ from .models import Category, Product, ProductImage
 from .services import category_create, category_update, product_create, product_update
 
 
-class CategoryListView(LoginRequiredMixin, ListView):
+class CategoryListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    permission_required = "product.view_category"
     model = Category
     template_name = "category/list.html"
     context_object_name = "categories"
@@ -38,23 +39,27 @@ class CategoryListView(LoginRequiredMixin, ListView):
         return [self.template_name]
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.add_category")
 def category_modal_create(request):
     form = CategoryForm()
     action_url = reverse("category-create")
-    return render(request, "category/modal_create.html", {"form": form, "action_url": action_url})
+    return render(
+        request, "category/modal_create.html", {"form": form, "action_url": action_url}
+    )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.change_category")
 def category_modal_edit(request, id):
     category = Category.objects.get(id=id)
     action_url = reverse("category-update", kwargs={"id": id})
 
     form = CategoryForm(instance=category)
-    return render(request, "category/modal_edit.html", {"form": form, "action_url": action_url})
+    return render(
+        request, "category/modal_edit.html", {"form": form, "action_url": action_url}
+    )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.add_category")
 @require_POST
 def create_category_view(request):
     """Create a new product via HTMX."""
@@ -73,7 +78,7 @@ def create_category_view(request):
         return HttpResponse(html, status=400)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.change_category")
 @require_http_methods(["POST"])
 def update_category_view(request, id):
     """Update product via HTMX."""
@@ -91,10 +96,14 @@ def update_category_view(request, id):
         return response
     else:
         # html = render_to_string('category/category_form.html', {'form': form})
-        return render(request, "category/modal_edit.html", {"form": form, "action_url": action_url})
+        return render(
+            request,
+            "category/modal_edit.html",
+            {"form": form, "action_url": action_url},
+        )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.delete_category")
 @require_http_methods(["DELETE"])
 def delete_category(request, id):
     category = get_object_or_404(Category, pk=id)
@@ -105,7 +114,8 @@ def delete_category(request, id):
     return response
 
 
-class ProductListView(LoginRequiredMixin, ListView):
+class ProductListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    permission_required = "product.view_product"
     model = Product
     template_name = "product/list.html"
     context_object_name = "products"
@@ -119,14 +129,14 @@ def product_modal_create(request):
 
 
 @login_required
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.add_product")
 @require_GET
 def product_create_view(request):
     form = ProductForm()
     return render(request, "product/create.html", {"form": form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.add_product")
 @require_http_methods(["GET", "POST"])
 def create_product(request):
     """Create a new product via HTMX."""
@@ -149,7 +159,11 @@ def create_product(request):
             return render(
                 request,
                 "product/create.html",
-                {"form": form, "image_formset": image_formset, "action_url": action_url},
+                {
+                    "form": form,
+                    "image_formset": image_formset,
+                    "action_url": action_url,
+                },
             )
 
     form = ProductForm()
@@ -159,11 +173,16 @@ def create_product(request):
     return render(
         request,
         "product/create.html",
-        {"form": form, "image_formset": image_formset, "variant_formset": variant_formset, "action_url": action_url}
+        {
+            "form": form,
+            "image_formset": image_formset,
+            "variant_formset": variant_formset,
+            "action_url": action_url,
+        },
     )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.change_product")
 @require_http_methods(["GET", "POST"])
 def update_product_view(request, id):
     """Update product via HTMX."""
@@ -172,8 +191,12 @@ def update_product_view(request, id):
 
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES, instance=product)
-        image_formset = ProductImageFormset(request.POST, request.FILES, instance=product)
-        variant_formset = ProductVariantFormset(request.POST, request.FILES, instance=product)
+        image_formset = ProductImageFormset(
+            request.POST, request.FILES, instance=product
+        )
+        variant_formset = ProductVariantFormset(
+            request.POST, request.FILES, instance=product
+        )
 
         if form.is_valid() and image_formset.is_valid() and variant_formset.is_valid():
             data = form.data
@@ -219,8 +242,12 @@ def update_product_view(request, id):
             return render(
                 request,
                 "product/edit.html",
-                {"form": form, "image_formset": image_formset, "variant_formset": variant_formset,
-                 "action_url": action_url},
+                {
+                    "form": form,
+                    "image_formset": image_formset,
+                    "variant_formset": variant_formset,
+                    "action_url": action_url,
+                },
             )
 
     form = ProductForm(instance=product)
@@ -228,12 +255,18 @@ def update_product_view(request, id):
     variant_formset = ProductVariantFormset(instance=product)
 
     return render(
-        request, "product/edit.html",
-        {"form": form, "image_formset": image_formset, "variant_formset": variant_formset, "action_url": action_url}
+        request,
+        "product/edit.html",
+        {
+            "form": form,
+            "image_formset": image_formset,
+            "variant_formset": variant_formset,
+            "action_url": action_url,
+        },
     )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("product.change_product")
 @require_http_methods(["DELETE"])
 def delete_product_view(request, id):
     product = get_object_or_404(Product, pk=id)

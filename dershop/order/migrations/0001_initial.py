@@ -11,60 +11,137 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('product', '0003_alter_productimage_filename'),
+        ("product", "0003_alter_productimage_filename"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Order',
+            name="Order",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('no', models.CharField(max_length=14)),
-                ('sub_total', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('tax_percent', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('tax_amount', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('total_amount', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('status', models.CharField(choices=[('CR', 'Created'), ('PA', 'Paid'), ('SH', 'Shipped'), ('DO', 'Done')], default='CR', max_length=2)),
-                ('customer', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("no", models.CharField(max_length=14)),
+                ("sub_total", models.DecimalField(decimal_places=2, max_digits=9)),
+                ("tax_percent", models.DecimalField(decimal_places=2, max_digits=9)),
+                ("tax_amount", models.DecimalField(decimal_places=2, max_digits=9)),
+                ("total_amount", models.DecimalField(decimal_places=2, max_digits=9)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("CR", "Created"),
+                            ("PA", "Paid"),
+                            ("SH", "Shipped"),
+                            ("DO", "Done"),
+                        ],
+                        default="CR",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "customer",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='OrderLine',
+            name="OrderLine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('qty', models.IntegerField()),
-                ('price', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('sub_total', models.DecimalField(decimal_places=2, max_digits=9)),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='order_lines', to='order.order')),
-                ('variant', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='product.variant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("qty", models.IntegerField()),
+                ("price", models.DecimalField(decimal_places=2, max_digits=9)),
+                ("sub_total", models.DecimalField(decimal_places=2, max_digits=9)),
+                (
+                    "order",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT,
+                        related_name="order_lines",
+                        to="order.order",
+                    ),
+                ),
+                (
+                    "variant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT,
+                        to="product.variant",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ShippingAddress',
+            name="ShippingAddress",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('mobile', models.CharField(max_length=20)),
-                ('address', models.CharField(max_length=255)),
-                ('city', models.CharField(max_length=50)),
-                ('province', models.CharField(max_length=50)),
-                ('postal_code', models.CharField(max_length=10)),
-                ('order', models.OneToOneField(on_delete=django.db.models.deletion.RESTRICT, related_name='shipping_address', to='order.order')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("mobile", models.CharField(max_length=20)),
+                ("address", models.CharField(max_length=255)),
+                ("city", models.CharField(max_length=50)),
+                ("province", models.CharField(max_length=50)),
+                ("postal_code", models.CharField(max_length=10)),
+                (
+                    "order",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.RESTRICT,
+                        related_name="shipping_address",
+                        to="order.order",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

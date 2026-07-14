@@ -14,7 +14,9 @@ class Migration(migrations.Migration):
             model_name="productimage",
             name="filename",
             field=models.ImageField(
-                blank=True, null=True, upload_to=dershop.common.models.get_unique_product_file_path
+                blank=True,
+                null=True,
+                upload_to=dershop.common.models.get_unique_product_file_path,
             ),
         ),
     ]

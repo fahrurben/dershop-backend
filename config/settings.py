@@ -74,8 +74,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
-            'builtins': [
-                'dershop.common.templatetags.custom_tags',
+            "builtins": [
+                "dershop.common.templatetags.custom_tags",
             ],
         },
     },
@@ -142,4 +142,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000
 
-LOGIN_URL = 'login'
+LOGIN_URL = "login"

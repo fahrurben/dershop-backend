@@ -1,6 +1,6 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Q
 from django.db.models import Value, F
 from django.db.models.functions import Concat
@@ -14,7 +14,8 @@ from dershop.order.forms import OrderStatusForm
 from dershop.order.models import Order, OrderStatus
 
 
-class OrderListView(LoginRequiredMixin, ListView):
+class OrderListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    permission_required = "order.view_order"
     model = Order
     template_name = "order/list.html"
     context_object_name = "orders"
@@ -27,19 +28,23 @@ class OrderListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add your class or instance to the context
-        context['status_choices'] = OrderStatus.choices
+        context["status_choices"] = OrderStatus.choices
         return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
         queryset = queryset.annotate(
-            full_name=Concat(F('customer__first_name'), Value(' '), F('customer__last_name'))
+            full_name=Concat(
+                F("customer__first_name"), Value(" "), F("customer__last_name")
+            )
         )
         query = self.request.GET.get("q")
         status = self.request.GET.get("status")
 
         if query:
-            queryset = queryset.filter(Q(Q(full_name__icontains=query) | Q(no__icontains=query)))
+            queryset = queryset.filter(
+                Q(Q(full_name__icontains=query) | Q(no__icontains=query))
+            )
 
         if status:
             queryset = queryset.filter(status=status)
@@ -53,23 +58,25 @@ class OrderListView(LoginRequiredMixin, ListView):
         return [self.template_name]
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("order.view_order")
 def order_modal_view(request, id):
     order = Order.objects.get(id=id)
 
     return render(request, "order/modal_view.html", {"order": order})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("order.view_order")
 def order_modal_edit(request, id):
     order = Order.objects.get(id=id)
     action_url = reverse("order-update", kwargs={"id": id})
 
     form = OrderStatusForm(instance=order)
-    return render(request, "order/modal_edit.html", {"form": form, "action_url": action_url})
+    return render(
+        request, "order/modal_edit.html", {"form": form, "action_url": action_url}
+    )
 
 
-@user_passes_test(lambda u: u.is_staff)
+@permission_required("order.change_order")
 @require_http_methods(["POST"])
 def update_order_view(request, id):
     """Update product via HTMX."""
@@ -80,7 +87,7 @@ def update_order_view(request, id):
 
     if form.is_valid():
         order = Order.objects.get(id=id)
-        order.status = data.get('status')
+        order.status = data.get("status")
         order.save()
 
         messages.success(request, "Item updated successfully!")
@@ -88,4 +95,6 @@ def update_order_view(request, id):
         response["HX-Redirect"] = reverse("order-list")
         return response
     else:
-        return render(request, "order/modal_edit.html", {"form": form, "action_url": action_url})
+        return render(
+            request, "order/modal_edit.html", {"form": form, "action_url": action_url}
+        )

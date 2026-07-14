@@ -1,8 +1,10 @@
 from django.urls import path
 
 from dershop.order.views import (
-    OrderListView, order_modal_view, order_modal_edit, update_order_view,
-
+    OrderListView,
+    order_modal_view,
+    order_modal_edit,
+    update_order_view,
 )
 
 urlpatterns = [
